@@ -13,3 +13,5 @@ Key Benefits:
 1.** Centralized Logging**: Keeps a permanent, searchable record of all your emails in Google Sheets.
 2. Instant Visibility: You get notified of important emails on Telegram without having to open your inbox.
 3. Custom Filtering: By default, it captures the “Category” and “Labels” to help you distinguish between personal, social, or promotional emails at a glance.
+
+Link to view : https://creators.n8n.io/workflows/15182
