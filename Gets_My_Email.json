@@ -1,0 +1,99 @@
+{
+  "name": "Gmail_to_Sheets_and_Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "custom",
+              "cronExpression": "0 */5 * * * *"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [0, 0],
+      "id": "gmail-trigger-node",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CRED_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "From": "={{ $json.From }}",
+            "Read/Unread": "={{ $json.labels[2].name }}",
+            "Subject": "={{ $json.Subject }}",
+            "Category": "={{ $json.labels[1].name }}",
+            "Body": "={{ $json.snippet }}"
+          },
+          "matchingColumns": ["Time"],
+          "schema": [
+            { "id": "From", "displayName": "From", "type": "string" },
+            { "id": "Read/Unread", "displayName": "Read/Unread", "type": "string" },
+            { "id": "Category", "displayName": "Category", "type": "string" },
+            { "id": "Subject", "displayName": "Subject", "type": "string" },
+            { "id": "Body", "displayName": "Body", "type": "string" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [224, 0],
+      "id": "sheets-append-node",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=From :{{ $json.From }},\nCategory :{{ $json.Category }},\nSubject:{{ $json.Subject }},\nBody:{{ $json.Body }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [432, 0],
+      "id": "telegram-node",
+      "name": "Send a text message",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CRED_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [[{ "node": "Append row in sheet", "type": "main", "index": 0 }]]
+    },
+    "Append row in sheet": {
+      "main": [[{ "node": "Send a text message", "type": "main", "index": 0 }]]
+    }
+  }
+}
